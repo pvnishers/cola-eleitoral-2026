@@ -919,6 +919,102 @@ function bindColaEvents() {
 //  DOWNLOAD DA IMAGEM (html2canvas com Blindagem de Scroll & Transform)
 // ─────────────────────────────────────────────────────────────────────
 
+function isIOS() {
+  return /iP(hone|ad|od)/i.test(navigator.userAgent) ||
+         (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+}
+
+function mostrarModalImagem(dataUrl) {
+  // Remover modal anterior se existir
+  document.getElementById('ios-save-modal')?.remove();
+
+  const overlay = document.createElement('div');
+  overlay.id = 'ios-save-modal';
+  overlay.style.cssText = `
+    position: fixed; inset: 0; z-index: 99999;
+    background: rgba(0,0,0,0.92);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 20px; gap: 16px;
+    animation: fadeIn 0.25s ease both;
+  `;
+
+  overlay.innerHTML = `
+    <div style="
+      background: #0d1b2a;
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 20px;
+      padding: 20px;
+      width: 100%;
+      max-width: 420px;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      overflow: hidden;
+    ">
+      <div style="display:flex; align-items:center; justify-content:space-between;">
+        <div>
+          <div style="font-size:15px; font-weight:700; color:#ffffff;">Sua cola está pronta!</div>
+          <div style="font-size:11px; color:rgba(255,255,255,0.45); margin-top:2px;">
+            Pressione e segure a imagem → <strong style="color:#6ee7b7">Salvar na Fototeca</strong>
+          </div>
+        </div>
+        <button id="ios-modal-close" style="
+          width:32px; height:32px; border-radius:50%;
+          background:rgba(255,255,255,0.08);
+          border:1px solid rgba(255,255,255,0.15);
+          color:rgba(255,255,255,0.6);
+          font-size:16px; cursor:pointer;
+          display:flex; align-items:center; justify-content:center;
+          flex-shrink:0;
+        ">✕</button>
+      </div>
+
+      <div style="
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        border-radius: 12px;
+        border: 1px solid rgba(255,255,255,0.08);
+      ">
+        <img
+          src="${dataUrl}"
+          alt="Cola Eleitoral 2026"
+          style="
+            display: block;
+            width: 100%;
+            height: auto;
+            border-radius: 12px;
+            -webkit-touch-callout: default;
+            user-select: none;
+          "
+        />
+      </div>
+
+      <div style="
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(5,150,105,0.1);
+        border: 1px solid rgba(5,150,105,0.25);
+        border-radius: 10px;
+        padding: 10px 14px;
+      ">
+        <span style="font-size:18px; flex-shrink:0;">☝️</span>
+        <p style="font-size:11px; color:rgba(255,255,255,0.7); line-height:1.5; margin:0;">
+          No Safari: <strong style="color:#fff">toque e segure</strong> a imagem acima e escolha <em>"Salvar Imagem"</em> ou <em>"Adicionar à Fototeca"</em>.
+        </p>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
+
+  const closeBtn = document.getElementById('ios-modal-close');
+  closeBtn?.addEventListener('click', () => overlay.remove());
+  overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+}
+
 async function baixarImagem() {
   const btn   = $('btn-baixar');
   const label = $('label-baixar');
@@ -1032,10 +1128,17 @@ async function baixarImagem() {
       },
     });
 
-    const link    = document.createElement('a');
-    link.download = `cola-eleitoral-2026-${state.uf || 'brasil'}-${tema}.png`;
-    link.href     = canvas.toDataURL('image/png');
-    link.click();
+    const dataUrl = canvas.toDataURL('image/png');
+
+    if (isIOS()) {
+      // iOS Safari ignora o atributo download em data URLs — mostrar modal para salvar
+      mostrarModalImagem(dataUrl);
+    } else {
+      const link    = document.createElement('a');
+      link.download = `cola-eleitoral-2026-${state.uf || 'brasil'}-${tema}.png`;
+      link.href     = dataUrl;
+      link.click();
+    }
   } catch (err) {
     console.error('Erro html2canvas:', err);
     mostrarErro('Não foi possível gerar a imagem automaticamente. Você pode tirar um print da tela.');
