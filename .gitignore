@@ -1,0 +1,25 @@
+# Dados e arquivos pesados — não versionados
+dados_tse_2026/
+foto_cand2026_SP_div/
+*.zip
+*.ps1
+
+# Scripts de uso local
+baixar_fotos_tse.py
+baixar_todas_fotos.bat
+dl_tse.py
+check.py
+iniciar_servidor.bat
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/

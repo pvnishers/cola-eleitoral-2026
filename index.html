@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="h-full">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cola Eleitoral 2026 — Monte Seu Voto</title>
+  <meta name="description" content="Pesquise candidatos das Eleições Gerais 2026, monte sua cola personalizada e salve no celular para o dia da votação." />
+  <meta name="theme-color" content="#0d1b2a" />
+
+  <!-- Tailwind CSS via CDN (Play) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- html2canvas via CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+  <!-- Google Fonts: Inter + Courier Prime -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+
+  <!-- Tailwind config -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'ui-sans-serif', 'system-ui'],
+            mono: ['"Courier Prime"', 'Courier', 'ui-monospace'],
+          },
+          colors: {
+            ink: {
+              950: '#060d16',
+              900: '#0d1b2a',
+              800: '#142232',
+              700: '#1e3147',
+              600: '#2d4a65',
+            },
+            leaf: {
+              300: '#6ee7b7',
+              400: '#34d399',
+              500: '#10b981',
+              600: '#059669',
+              700: '#047857',
+              800: '#065f46',
+            },
+            amber: {
+              400: '#fbbf24',
+              500: '#f59e0b',
+              600: '#d97706',
+            }
+          },
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* ─── Base ──────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; }
+
+    html, body {
+      font-family: 'Inter', ui-sans-serif, system-ui;
+      background-color: #0d1b2a;
+      color: #e2eaf3;
+      min-height: 100%;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ─── Screen routing ─────────────────────── */
+    .screen { display: none; }
+    .screen.active { display: block; min-height: calc(100vh - 57px); }
+
+    /* ─── Animations ─────────────────────────── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%       { opacity: 0.4; transform: scale(0.8); }
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    @keyframes shimmer {
+      0%   { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+
+    .fade-up   { animation: fadeUp 0.45s cubic-bezier(0.22, 1, 0.36, 1) both; }
+    .fade-in   { animation: fadeIn 0.3s ease both; }
+    .spin-icon { animation: spin 0.8s linear infinite; }
+    .pulse-dot { animation: pulse-dot 1.6s ease infinite; }
+
+    /* ─── Header gradient ────────────────────── */
+    .app-header {
+      background: linear-gradient(180deg, #071422 0%, #0d1b2a 100%);
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+    }
+
+    /* ─── Progress bar ───────────────────────── */
+    #progress-bar {
+      transition: width 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+      background: linear-gradient(90deg, #059669, #10b981);
+    }
+
+    /* ─── UF buttons ─────────────────────────── */
+    .uf-btn {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      color: rgba(255,255,255,0.65);
+      transition: background 0.18s, color 0.18s, transform 0.18s, box-shadow 0.18s;
+    }
+    .uf-btn:hover {
+      background: rgba(16, 185, 129, 0.18);
+      border-color: rgba(16, 185, 129, 0.5);
+      color: #6ee7b7;
+      transform: translateY(-1px);
+    }
+    .uf-btn.selected {
+      background: rgba(16, 185, 129, 0.22);
+      border-color: #10b981;
+      color: #34d399;
+      font-weight: 700;
+      box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+    }
+
+    /* ─── Search inputs ──────────────────────── */
+    .search-input {
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.15);
+      color: #e2eaf3;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .search-input::placeholder { color: rgba(255,255,255,0.3); }
+    .search-input:focus {
+      outline: none;
+      border-color: #10b981;
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.12);
+    }
+
+    /* ─── Accordion ──────────────────────────── */
+    .accordion-body {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .accordion-body.open {
+      max-height: 850px;
+    }
+
+    .cargo-card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      transition: border-color 0.3s;
+    }
+    .cargo-card.done {
+      border-color: rgba(16, 185, 129, 0.35);
+      background: rgba(16, 185, 129, 0.04);
+    }
+
+    /* ─── Candidate list (Fixed scroll) ───────── */
+    .candidate-list {
+      max-height: 320px;
+      overflow-y: auto !important;
+      overflow-x: hidden !important;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior: contain;
+      touch-action: pan-y;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(16, 185, 129, 0.5) rgba(255, 255, 255, 0.05);
+    }
+    .candidate-list::-webkit-scrollbar {
+      width: 6px;
+    }
+    .candidate-list::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.04);
+      border-radius: 8px;
+      margin: 4px 0;
+    }
+    .candidate-list::-webkit-scrollbar-thumb {
+      background: rgba(16, 185, 129, 0.45);
+      border-radius: 8px;
+    }
+    .candidate-list::-webkit-scrollbar-thumb:hover {
+      background: #10b981;
+    }
+
+    .candidate-item {
+      border-left: 2px solid transparent;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .candidate-item:hover { background: rgba(255,255,255,0.06); }
+    .candidate-item.is-selected {
+      background: rgba(16, 185, 129, 0.1);
+      border-left-color: #10b981;
+    }
+
+    /* ─── Buttons ────────────────────────────── */
+    .btn-primary {
+      background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+      box-shadow: 0 4px 20px rgba(16, 185, 129, 0.25);
+      transition: filter 0.2s, transform 0.15s, box-shadow 0.2s;
+    }
+    .btn-primary:hover {
+      filter: brightness(1.1);
+      box-shadow: 0 6px 24px rgba(16, 185, 129, 0.35);
+    }
+    .btn-primary:active { transform: scale(0.97); }
+
+    .btn-gold {
+      background: linear-gradient(135deg, #d97706 0%, #f59e0b 100%);
+      box-shadow: 0 4px 20px rgba(245, 158, 11, 0.2);
+      transition: filter 0.2s, transform 0.15s, box-shadow 0.2s;
+    }
+    .btn-gold:hover {
+      filter: brightness(1.08);
+      box-shadow: 0 6px 24px rgba(245, 158, 11, 0.32);
+    }
+    .btn-gold:active { transform: scale(0.97); }
+
+    .btn-ghost {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .btn-ghost:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.2); }
+
+    /* ─── Cola Paper (Alto Contraste & Nítido) ─── */
+    #area-cola {
+      background: #ffffff;
+      color: #0f172a;
+      border: 2px solid #0f172a;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+    }
+
+    /* ── Tema 1: Branco Nítido (Padrão) ── */
+    #area-cola.theme-branco {
+      background: #ffffff !important;
+      border-color: #0f172a !important;
+      color: #0f172a !important;
+    }
+    #area-cola.theme-branco .cola-header-title { color: #064e3b; }
+    #area-cola.theme-branco .cola-header-sub { color: #334155; }
+    #area-cola.theme-branco .cola-header-badge { background: #ecfdf5; color: #047857; border-color: #059669; }
+    #area-cola.theme-branco .cola-cargo-badge { background: #d1fae5; color: #064e3b; border-color: #10b981; }
+    #area-cola.theme-branco .cola-candidate-name { color: #0f172a; }
+    #area-cola.theme-branco .cola-party { color: #334155; }
+    #area-cola.theme-branco .cola-digit-box { background: #f8fafc; border-color: #0f172a; color: #0f172a; }
+    #area-cola.theme-branco .cola-divider { border-color: #cbd5e1; }
+    #area-cola.theme-branco .cola-footer-text { color: #64748b; }
+
+    /* ── Tema 2: Papel Creme ── */
+    #area-cola.theme-papel {
+      background: #fdfbf2 !important;
+      border-color: #3b2e1e !important;
+      color: #1a130b !important;
+    }
+    #area-cola.theme-papel .cola-header-title { color: #3b2e1e; }
+    #area-cola.theme-papel .cola-header-sub { color: #574835; }
+    #area-cola.theme-papel .cola-header-badge { background: #f5eed7; color: #3b2e1e; border-color: #8c7350; }
+    #area-cola.theme-papel .cola-cargo-badge { background: #eddcb9; color: #2d2417; border-color: #c9b082; }
+    #area-cola.theme-papel .cola-candidate-name { color: #1a130b; }
+    #area-cola.theme-papel .cola-party { color: #4a3d2c; }
+    #area-cola.theme-papel .cola-digit-box { background: #f7f1de; border-color: #3b2e1e; color: #1a130b; }
+    #area-cola.theme-papel .cola-divider { border-color: #d9cbab; }
+    #area-cola.theme-papel .cola-footer-text { color: #7a6850; }
+
+    /* ── Tema 3: Modo Escuro (AMOLED) ── */
+    #area-cola.theme-dark {
+      background: #0d1b2a !important;
+      border-color: #10b981 !important;
+      color: #f1f5f9 !important;
+    }
+    #area-cola.theme-dark .cola-header-title { color: #34d399; }
+    #area-cola.theme-dark .cola-header-sub { color: #94a3b8; }
+    #area-cola.theme-dark .cola-header-badge { background: #064e3b; color: #34d399; border-color: #10b981; }
+    #area-cola.theme-dark .cola-cargo-badge { background: rgba(16, 185, 129, 0.2); color: #6ee7b7; border-color: #10b981; }
+    #area-cola.theme-dark .cola-candidate-name { color: #ffffff; }
+    #area-cola.theme-dark .cola-party { color: #cbd5e1; }
+    #area-cola.theme-dark .cola-digit-box { background: #064e3b; border-color: #34d399; color: #34d399; }
+    #area-cola.theme-dark .cola-divider { border-color: #1e3a5f; }
+    #area-cola.theme-dark .cola-footer-text { color: #64748b; }
+
+    .cola-divider {
+      border: none;
+      border-top: 1.5px solid #cbd5e1;
+      margin: 10px 0;
+    }
+
+    .cola-header-title {
+      font-family: 'Inter', sans-serif;
+      font-size: 17px;
+      font-weight: 900;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .cola-header-sub {
+      font-size: 10.5px;
+      font-weight: 600;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      opacity: 0.6;
+    }
+
+    /* Estado pill — refinado, sem emoji, sem borda forte */
+    .cola-header-estado {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 3px 14px;
+      border-radius: 99px;
+      background: rgba(5, 150, 105, 0.1);
+      color: #059669;
+      border: 1px solid rgba(5, 150, 105, 0.35);
+    }
+    #area-cola.theme-papel .cola-header-estado { background: rgba(59,46,30,0.08); color: #3b2e1e; border-color: rgba(59,46,30,0.25); }
+    #area-cola.theme-dark  .cola-header-estado { background: rgba(16,185,129,0.12); color: #34d399; border-color: rgba(16,185,129,0.3); }
+
+    /* Barra de acento lateral do cargo — substitui badge com emoji */
+    .cola-cargo-accent {
+      width: 3px;
+      height: 13px;
+      border-radius: 2px;
+      background: #059669;
+      flex-shrink: 0;
+    }
+    #area-cola.theme-papel .cola-cargo-accent { background: #3b2e1e; }
+    #area-cola.theme-dark  .cola-cargo-accent { background: #34d399; }
+
+    .cola-cargo-label {
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #059669;
+    }
+    #area-cola.theme-papel .cola-cargo-label { color: #3b2e1e; }
+    #area-cola.theme-dark  .cola-cargo-label { color: #34d399; }
+
+    .cola-candidate-name {
+      font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+      font-size: 15px;
+      font-weight: 900;
+      letter-spacing: -0.01em;
+      text-transform: uppercase;
+      line-height: 1.2;
+      margin-top: 1px;
+    }
+
+    .cola-party {
+      font-size: 11px;
+      font-weight: 600;
+      line-height: 1.3;
+      margin-top: 2px;
+      opacity: 0.7;
+    }
+
+    /* ── Caixa de Dígitos estilo Urna Eletrônica ── */
+    .cola-digits-wrapper {
+      display: inline-flex;
+      gap: 4px;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    table.cola-digit-box {
+      display: inline-table;
+      border-collapse: collapse;
+      width: 30px;
+      height: 42px;
+      border: 2.5px solid #0f172a;
+      border-radius: 8px;
+      background: #f8fafc;
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+    }
+
+    table.cola-digit-box td {
+      vertical-align: middle;
+      text-align: center;
+      padding: 0;
+      margin: 0;
+      font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+      font-size: 22px;
+      font-weight: 900;
+      color: #0f172a;
+      line-height: 1;
+    }
+
+    /* Temas para a table */
+    #area-cola.theme-branco table.cola-digit-box { background: #f8fafc; border-color: #0f172a; }
+    #area-cola.theme-branco table.cola-digit-box td { color: #0f172a; }
+    #area-cola.theme-papel table.cola-digit-box  { background: #f7f1de; border-color: #3b2e1e; }
+    #area-cola.theme-papel table.cola-digit-box td  { color: #1a130b; }
+    #area-cola.theme-dark table.cola-digit-box   { background: #064e3b; border-color: #34d399; }
+    #area-cola.theme-dark table.cola-digit-box td   { color: #34d399; }
+
+    .cola-footer-text {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      opacity: 0.5;
+    }
+
+    /* ─── Shimmer skeleton ───────────────────── */
+    .skeleton {
+      background: linear-gradient(90deg, rgba(255,255,255,0.06) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.06) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.4s infinite;
+      border-radius: 6px;
+    }
+
+    /* ─── Responsive ─────────────────────────── */
+    @media (max-width: 400px) {
+      .cola-numero { font-size: 1.6rem; }
+    }
+
+    /* ─── Cargo chips ─────────────────────────── */
+    .cargo-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+      flex-shrink: 0;
+      padding: 8px 14px;
+      border-radius: 99px;
+      font-size: 12px;
+      font-weight: 700;
+      border: 1.5px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.05);
+      color: rgba(255,255,255,0.5);
+      cursor: pointer;
+      transition: all 0.18s;
+    }
+    .cargo-chip:hover {
+      border-color: rgba(16,185,129,0.4);
+      color: #6ee7b7;
+      background: rgba(16,185,129,0.08);
+    }
+    .cargo-chip.active {
+      border-color: #10b981;
+      background: rgba(16,185,129,0.18);
+      color: #34d399;
+      box-shadow: 0 0 0 3px rgba(16,185,129,0.12);
+    }
+    .cargo-chip.done {
+      border-color: rgba(16,185,129,0.5);
+      color: #6ee7b7;
+    }
+    .cargo-chip.done::after {
+      content: ' ✓';
+      color: #34d399;
+      font-weight: 900;
+    }
+    .chip-scroll::-webkit-scrollbar { display: none; }
+
+    /* ─── Card do candidato escolhido ─────────── */
+    .chosen-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      margin-bottom: 14px;
+      background: rgba(16,185,129,0.1);
+      border: 1px solid rgba(16,185,129,0.3);
+    }
+    .chosen-card-info { flex: 1; min-width: 0; }
+    .chosen-card-name { font-size: 14px; font-weight: 700; color: #6ee7b7; }
+    .chosen-card-meta { font-size: 11px; color: rgba(255,255,255,0.5); margin-top: 2px; }
+    .chosen-card-num {
+      font-family: monospace;
+      font-size: 18px;
+      font-weight: 900;
+      color: #34d399;
+      background: rgba(16,185,129,0.15);
+      padding: 4px 10px;
+      border-radius: 8px;
+      flex-shrink: 0;
+    }
+    .btn-desmarcar {
+      flex-shrink: 0;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.15);
+      color: rgba(255,255,255,0.5);
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s, color 0.15s;
+    }
+    .btn-desmarcar:hover { background: rgba(239,68,68,0.2); color: #fca5a5; border-color: rgba(239,68,68,0.4); }
+
+    /* ─── Botão próximo cargo ─────────────────── */
+    .btn-proximo-cargo {
+      width: 100%;
+      margin-top: 12px;
+      padding: 12px;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 700;
+      color: #34d399;
+      background: rgba(16,185,129,0.08);
+      border: 1.5px dashed rgba(16,185,129,0.3);
+      cursor: pointer;
+      transition: background 0.18s, border-color 0.18s;
+      text-align: center;
+    }
+    .btn-proximo-cargo:hover { background: rgba(16,185,129,0.15); border-color: rgba(16,185,129,0.5); }
+  </style>
+</head>
+
+<body>
+
+  <!-- ══════════════════════════════════════════════════════════
+       APP HEADER — sticky
+  ══════════════════════════════════════════════════════════ -->
+  <header class="app-header sticky top-0 z-50">
+    <div class="max-w-2xl mx-auto px-4 h-14 flex items-center justify-between">
+
+      <!-- Logo -->
+      <div class="flex items-center gap-2.5">
+        <div class="w-8 h-8 rounded-lg flex items-center justify-center text-base"
+             style="background:rgba(16,185,129,0.15); border:1px solid rgba(16,185,129,0.25)">
+          🗳️
+        </div>
+        <div>
+          <div class="text-[13px] font-bold text-white leading-none">Cola Eleitoral</div>
+          <div class="text-[10px] font-semibold tracking-widest" style="color:#34d399">ELEIÇÕES 2026</div>
+        </div>
+      </div>
+
+      <!-- UF badge (hidden initially) -->
+      <div id="header-uf-area" class="hidden items-center gap-2">
+        <span class="text-[11px] text-white/40">Estado:</span>
+        <span id="header-uf-badge"
+          class="text-[11px] font-bold px-2 py-0.5 rounded-full"
+          style="background:rgba(16,185,129,0.15); color:#34d399; border:1px solid rgba(16,185,129,0.3)">
+        </span>
+        <button id="btn-trocar-uf"
+          class="text-[11px] text-white/30 hover:text-white/70 transition-colors ml-1">
+          trocar
+        </button>
+      </div>
+
+    </div>
+
+    <!-- Progress bar -->
+    <div class="h-[2px]" style="background:rgba(255,255,255,0.06)">
+      <div id="progress-bar" class="h-full w-0 rounded-r-full"></div>
+    </div>
+  </header>
+
+
+  <!-- ══════════════════════════════════════════════════════════
+       TELA 1 — Boas-vindas + Seleção de UF
+  ══════════════════════════════════════════════════════════ -->
+  <div id="screen-welcome" class="screen active">
+    <div class="max-w-2xl mx-auto px-4 py-8 pb-16">
+
+      <!-- Hero -->
+      <div class="text-center mb-10">
+        <div class="inline-flex items-center gap-2 mb-5 px-3 py-1.5 rounded-full text-[11px] font-semibold tracking-wider fade-up"
+             style="background:rgba(16,185,129,0.1); color:#34d399; border:1px solid rgba(16,185,129,0.2); animation-delay:0s">
+          <span class="pulse-dot w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+          4 DE OUTUBRO DE 2026
+        </div>
+
+        <h2 class="text-[32px] sm:text-[40px] font-black text-white leading-[1.15] mb-4 fade-up"
+            style="animation-delay:0.07s">
+          Sua cola eleitoral,<br>
+          <span style="color:#34d399">sem complicação.</span>
+        </h2>
+
+        <p class="text-sm text-white/50 max-w-xs mx-auto leading-relaxed fade-up"
+           style="animation-delay:0.14s">
+          Pesquise candidatos, monte suas escolhas e baixe a imagem para levar na hora de votar.
+        </p>
+      </div>
+
+      <!-- Steps -->
+      <div class="grid grid-cols-3 gap-3 mb-10 fade-up" style="animation-delay:0.21s">
+        <div class="rounded-xl p-4 text-center" style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08)">
+          <div class="text-2xl mb-2">📍</div>
+          <p class="text-[11px] font-medium leading-snug" style="color:rgba(255,255,255,0.6)">Escolha<br>seu estado</p>
+        </div>
+        <div class="rounded-xl p-4 text-center" style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08)">
+          <div class="text-2xl mb-2">🔎</div>
+          <p class="text-[11px] font-medium leading-snug" style="color:rgba(255,255,255,0.6)">Busque<br>candidatos</p>
+        </div>
+        <div class="rounded-xl p-4 text-center" style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08)">
+          <div class="text-2xl mb-2">📲</div>
+          <p class="text-[11px] font-medium leading-snug" style="color:rgba(255,255,255,0.6)">Baixe<br>a imagem</p>
+        </div>
+      </div>
+
+      <!-- Seleção de UF -->
+      <div class="fade-up" style="animation-delay:0.28s">
+        <p class="text-[11px] font-semibold tracking-wider mb-3" style="color:rgba(255,255,255,0.4)">
+          SELECIONE SEU ESTADO
+        </p>
+
+        <!-- Search UF -->
+        <div class="relative mb-4">
+          <input id="uf-search" type="text" placeholder="Filtrar estado..."
+            class="search-input w-full rounded-xl px-4 py-3 text-sm pl-10" autocomplete="off" />
+          <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none"
+               style="color:rgba(255,255,255,0.3)" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 15.803a7.5 7.5 0 0 0 10.607 0Z"/>
+          </svg>
+        </div>
+
+        <!-- UF Grid -->
+        <div id="uf-grid" class="grid grid-cols-6 sm:grid-cols-9 gap-2 mb-6"></div>
+
+        <!-- Botão Continuar -->
+        <button id="btn-continuar"
+          class="btn-primary w-full text-white font-bold py-4 rounded-xl text-sm flex items-center justify-center gap-2 disabled:opacity-30 disabled:cursor-not-allowed disabled:shadow-none"
+          disabled>
+          Continuar para candidatos
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"/>
+          </svg>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════════════════════
+       TELA 2 — Seleção de Candidatos (Accordion)
+  ══════════════════════════════════════════════════════════ -->
+  <div id="screen-selection" class="screen">
+    <div class="max-w-2xl mx-auto px-4 py-5 pb-32">
+
+      <!-- Chips de cargos -->
+      <div class="mb-5 fade-up">
+        <p class="text-[10px] font-semibold tracking-widest mb-2.5" style="color:rgba(255,255,255,0.35)">SELECIONE CARGO A CARGO</p>
+        <div id="cargo-chips" class="flex gap-2 overflow-x-auto pb-2" style="scrollbar-width:none;-ms-overflow-style:none"></div>
+      </div>
+
+      <!-- Painel do cargo ativo -->
+      <div id="cargo-panel"></div>
+
+      <!-- Botão flutuante -->
+      <div class="fixed bottom-0 left-0 right-0 z-40"
+           style="background:linear-gradient(0deg, #0d1b2a 70%, transparent 100%); padding: 16px 16px 24px">
+        <div class="max-w-2xl mx-auto">
+          <button id="btn-gerar-cola"
+            class="btn-gold w-full text-white font-bold py-4 rounded-xl text-sm flex items-center justify-center gap-2">
+            <span>🗳️</span>
+            Gerar Cola Eleitoral
+          </button>
+          <p id="aviso-cola" class="text-center text-[11px] mt-2" style="color:rgba(255,255,255,0.3)">
+            Selecione ao menos um candidato
+          </p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════════════════════
+       TELA 3 — A Cola Final
+  ══════════════════════════════════════════════════════════ -->
+  <div id="screen-cola" class="screen">
+    <div class="max-w-2xl mx-auto px-4 py-6 pb-16">
+
+      <div class="flex items-center justify-between mb-4 fade-up">
+        <div>
+          <h2 class="text-xl font-bold text-white mb-0.5">Sua Cola Eleitoral</h2>
+          <p class="text-xs" style="color:rgba(255,255,255,0.45)">
+            Pronta para salvar no celular ou imprimir
+          </p>
+        </div>
+        <button id="btn-editar"
+          class="btn-ghost text-xs text-white/70 hover:text-white px-3 py-2 rounded-lg flex items-center gap-1.5 transition-all cursor-pointer">
+          ✏️ Editar escolhas
+        </button>
+      </div>
+
+      <!-- Seletor de Tema / Estilo da Cola -->
+      <div class="flex items-center justify-center gap-2 mb-4 p-1.5 rounded-xl bg-white/[0.04] border border-white/10 fade-up" style="animation-delay:0.04s">
+        <button id="theme-btn-branco" class="theme-select-btn active text-xs font-semibold px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 cursor-pointer bg-white/15 text-white shadow-sm" data-theme="branco">
+          <span class="w-3 h-3 rounded-full bg-white border border-slate-300"></span>
+          Branco (Nítido)
+        </button>
+        <button id="theme-btn-papel" class="theme-select-btn text-xs font-semibold px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 cursor-pointer text-white/60 hover:text-white hover:bg-white/10" data-theme="papel">
+          <span class="w-3 h-3 rounded-full bg-[#fefce8] border border-amber-300"></span>
+          Papel Creme
+        </button>
+        <button id="theme-btn-dark" class="theme-select-btn text-xs font-semibold px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 cursor-pointer text-white/60 hover:text-white hover:bg-white/10" data-theme="dark">
+          <span class="w-3 h-3 rounded-full bg-[#09131f] border border-emerald-400"></span>
+          Modo Escuro
+        </button>
+      </div>
+
+      <!-- ── A COLA (área capturada pelo html2canvas em alta resolução) ── -->
+      <div id="area-cola" class="rounded-2xl p-6 sm:p-7 mb-5 theme-branco">
+
+        <!-- Cabeçalho com contraste máximo -->
+        <div class="text-center pb-4">
+          <div class="cola-header-title">
+            MINHA COLA ELEITORAL
+          </div>
+          <div class="cola-header-sub mt-1.5">
+            Eleições Gerais 2026 · 4 de Outubro
+          </div>
+          <div class="mt-2.5">
+            <span id="cola-estado" class="cola-header-estado">SP</span>
+          </div>
+        </div>
+
+        <hr class="cola-divider">
+
+        <!-- Items dinâmicos dos candidatos -->
+        <div id="cola-items"></div>
+
+        <!-- Rodapé do cartão -->
+        <div class="text-center pt-3 mt-1">
+          <p class="cola-footer-text">
+            TSE • Dados Abertos Eleições 2026 • Leve no dia da votação
+          </p>
+        </div>
+
+      </div>
+      <!-- ── fim #area-cola ── -->
+
+      <!-- Ações -->
+      <div class="space-y-2.5 fade-up" style="animation-delay:0.18s">
+
+        <button id="btn-baixar"
+          class="btn-primary w-full text-white font-bold py-4 rounded-xl text-sm flex items-center justify-center gap-2">
+          <svg id="icon-download" class="w-4 h-4 flex-shrink-0"
+               fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3"/>
+          </svg>
+          <span id="label-baixar">Baixar Imagem da Cola (.png)</span>
+        </button>
+
+        <button id="btn-nova-cola"
+          class="btn-ghost w-full text-sm text-white/50 hover:text-white font-medium py-3 rounded-xl flex items-center justify-center gap-2 transition-all">
+          ↩ Montar nova cola do zero
+        </button>
+      </div>
+
+      <p class="text-center text-[10px] leading-relaxed mt-8" style="color:rgba(255,255,255,0.2)">
+        Dados baseados no Portal de Dados Abertos do TSE.<br>
+        Versão demo com candidatos fictícios. Substitua o candidatos.json pelo CSV oficial para dados reais.
+      </p>
+
+    </div>
+  </div>
+
+  <!-- app.js -->
+  <script src="app.js"></script>
+</body>
+</html>
