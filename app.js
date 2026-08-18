@@ -74,6 +74,18 @@ const UFS = [
   'RJ','RN','RS','RO','RR','SC','SP','SE','TO',
 ];
 
+const UF_NOMES = {
+  AC: 'Acre',           AL: 'Alagoas',          AP: 'Amapá',
+  AM: 'Amazonas',       BA: 'Bahia',            CE: 'Ceará',
+  DF: 'Distrito Federal', ES: 'Espírito Santo', GO: 'Goiás',
+  MA: 'Maranhão',       MT: 'Mato Grosso',      MS: 'Mato Grosso do Sul',
+  MG: 'Minas Gerais',   PA: 'Pará',             PB: 'Paraíba',
+  PR: 'Paraná',         PE: 'Pernambuco',       PI: 'Piauí',
+  RJ: 'Rio de Janeiro', RN: 'Rio Grande do Norte', RS: 'Rio Grande do Sul',
+  RO: 'Rondônia',       RR: 'Roraima',          SC: 'Santa Catarina',
+  SP: 'São Paulo',      SE: 'Sergipe',          TO: 'Tocantins',
+};
+
 const BATCH_SIZE  = 40;  // Quantos candidatos renderizar por vez no scroll
 const DEBOUNCE_MS = 180; // Delay para busca rápida
 
@@ -821,7 +833,7 @@ function setTemaCola(tema) {
 
 function renderCola() {
   const estadoEl = $('cola-estado');
-  if (estadoEl) estadoEl.textContent = state.uf;
+  if (estadoEl) estadoEl.textContent = UF_NOMES[state.uf] || state.uf;
 
   const container = $('cola-items');
   if (!container) return;

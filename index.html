@@ -106,7 +106,7 @@
     /* ─── Progress bar ───────────────────────── */
     #progress-bar {
       transition: width 0.5s cubic-bezier(0.22, 1, 0.36, 1);
-      background: linear-gradient(90deg, #059669, #10b981);
+      background: #059669;
     }
 
     /* ─── UF buttons ─────────────────────────── */
@@ -203,13 +203,13 @@
 
     /* ─── Buttons ────────────────────────────── */
     .btn-primary {
-      background: linear-gradient(135deg, #059669 0%, #10b981 100%);
-      box-shadow: 0 4px 20px rgba(16, 185, 129, 0.25);
+      background: #059669;
+      box-shadow: 0 2px 12px rgba(5, 150, 105, 0.2);
       transition: filter 0.2s, transform 0.15s, box-shadow 0.2s;
     }
     .btn-primary:hover {
-      filter: brightness(1.1);
-      box-shadow: 0 6px 24px rgba(16, 185, 129, 0.35);
+      filter: brightness(1.08);
+      box-shadow: 0 4px 18px rgba(5, 150, 105, 0.28);
     }
     .btn-primary:active { transform: scale(0.97); }
 
@@ -309,21 +309,18 @@
       opacity: 0.6;
     }
 
-    /* Estado pill — refinado, sem emoji, sem borda forte */
+    /* Estado — texto simples, sem badge */
     .cola-header-estado {
-      display: inline-block;
+      display: block;
       font-size: 11px;
-      font-weight: 800;
-      letter-spacing: 0.12em;
+      font-weight: 700;
+      letter-spacing: 0.18em;
       text-transform: uppercase;
-      padding: 3px 14px;
-      border-radius: 99px;
-      background: rgba(5, 150, 105, 0.1);
       color: #059669;
-      border: 1px solid rgba(5, 150, 105, 0.35);
+      margin-top: 6px;
     }
-    #area-cola.theme-papel .cola-header-estado { background: rgba(59,46,30,0.08); color: #3b2e1e; border-color: rgba(59,46,30,0.25); }
-    #area-cola.theme-dark  .cola-header-estado { background: rgba(16,185,129,0.12); color: #34d399; border-color: rgba(16,185,129,0.3); }
+    #area-cola.theme-papel .cola-header-estado { color: #5a4020; }
+    #area-cola.theme-dark  .cola-header-estado { color: #6ee7b7; }
 
     /* Barra de acento lateral do cargo — substitui badge com emoji */
     .cola-cargo-accent {
@@ -575,9 +572,8 @@
 
       <!-- Hero -->
       <div class="text-center mb-10">
-        <div class="inline-flex items-center gap-2 mb-5 px-3 py-1.5 rounded-full text-[11px] font-semibold tracking-wider fade-up"
-             style="background:rgba(16,185,129,0.1); color:#34d399; border:1px solid rgba(16,185,129,0.2); animation-delay:0s">
-          <span class="pulse-dot w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+        <div class="inline-flex items-center gap-2 mb-5 px-3 py-1 rounded-sm text-[10px] font-semibold tracking-widest fade-up"
+             style="color:rgba(255,255,255,0.35); border-bottom:1px solid rgba(255,255,255,0.12); animation-delay:0s">
           4 DE OUTUBRO DE 2026
         </div>
 
@@ -724,9 +720,7 @@
           <div class="cola-header-sub mt-1.5">
             Eleições Gerais 2026 · 4 de Outubro
           </div>
-          <div class="mt-2.5">
-            <span id="cola-estado" class="cola-header-estado">SP</span>
-          </div>
+          <span id="cola-estado" class="cola-header-estado">SP</span>
         </div>
 
         <hr class="cola-divider">
